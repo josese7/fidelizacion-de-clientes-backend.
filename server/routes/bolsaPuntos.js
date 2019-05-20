@@ -68,9 +68,9 @@ app.get('/bolsaPuntos/:id', function(req, res) {
         });
 });
 
-// Buscar Bolsa por
+// Buscar Bolsa por IDCliente
 
-app.get('/bolsaPuntos/buscar/:termino', (req, res) => {
+app.get('/bolsaPuntos/cliente/:termino', (req, res) => {
     let termino = req.params.termino;
 
     let hoy = new Date();
@@ -78,8 +78,8 @@ app.get('/bolsaPuntos/buscar/:termino', (req, res) => {
     let regex = new RegExp(termino, 'i');
 
     BolsaPuntos.find({
-        //idCliente: termino,
-        fechaCaducidad: termino
+        idCliente: termino,
+        //fechaCaducidad: termino
     }).exec((err, bolsaPuntosDB) => {
         if (err) {
             return res.status(500).json({
@@ -93,6 +93,35 @@ app.get('/bolsaPuntos/buscar/:termino', (req, res) => {
         });
     });
 });
+// Busca bolsas vencidas
+
+
+app.get('/bolsaPuntos/vencidas/', (req, res) => {
+    //let termino = req.params.termino;
+
+    let hoy = new Date();
+
+    console.log('Hoy es el', hoy);
+
+    let regex = new RegExp(termino, 'i');
+
+    BolsaPuntos.find({
+        //idCliente: termino,
+        fechaCaducidad: { $gte: hoy }
+    }).exec((err, bolsaPuntosDB) => {
+        if (err) {
+            return res.status(500).json({
+                ok: false,
+                err
+            });
+        }
+        res.json({
+            ok: true,
+            bolsaPuntos: bolsaPuntosDB
+        });
+    });
+});
+
 /* ==============
     
     METODO POST
