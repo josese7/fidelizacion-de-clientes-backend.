@@ -12,11 +12,8 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // parse application/json
 app.use(bodyParser.json());
 
-app.use(require('./routes/cliente'));
-app.use(require('./routes/reglaAsignacion'));
-app.use(require('./routes/vencimientoPuntos'));
-app.use(require('./routes/conceptoPuntos'));
-app.use(require('./routes/bolsaPuntos'));
+// Configuración global de rutas
+app.use(require('./routes/index'));
 
 mongoose.connect(
     'mongodb://localhost:27017/canjeodepuntos', { useNewUrlParser: true },
