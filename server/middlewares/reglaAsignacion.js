@@ -1,15 +1,16 @@
-const Cliente = require('../models/cliente');
+const ReglaAsignacion = require('../models/reglaAsignacion');
 
-function getClientes(req, res) {
+function getReglasAsignacion(req, res) {
     let desde = req.query.desde || 0;
     desde = Number(desde);
 
     let limite = req.query.limite || 5;
     limite = Number(limite);
-    Cliente.find({ estado: true }, 'nombre apellido correo')
+
+    ReglaAsignacion.find({ estado: true })
         .skip(desde)
         .limit(limite)
-        .exec((err, cliente) => {
+        .exec((err, reglaAsignacion) => {
             if (err) {
                 return res.status(400).json({
                     ok: false,
@@ -17,37 +18,26 @@ function getClientes(req, res) {
                 });
             }
 
-            Cliente.countDocuments({ estado: true }, (err, total) => {
+            ReglaAsignacion.countDocuments({ estado: true }, (err, total) => {
                 res.json({
                     ok: true,
-                    cliente,
+                    reglaAsignacion,
                     total
                 });
             });
         });
 }
 
-async function postCliente(req, res) {
+function postReglaAsignacion(req, res) {
     let body = req.body;
 
-    /* res.json({
-                                                                      cliente: body
-                                                                  }); */
-
-    let cliente = new Cliente({
-        nombre: body.nombre,
-        apellido: body.apellido,
-        cedula: body.cedula,
-        tipoDocumento: body.tipoDocumento,
-        nacionalidad: body.nacionalidad,
-        correo: body.correo,
-        telefono: body.telefono,
-        fechaNacimiento: body.fechaNacimiento
+    let reglaAsignacion = new ReglaAsignacion({
+        limiteInf: body.limiteInf,
+        limiteSup: body.limiteSup,
+        monto: body.monto
     });
 
-    console.log(req.body.nombre, 'Req');
-
-    cliente.save((err, clienteDB) => {
+    reglaAsignacion.save((err, reglaAsignacionDB) => {
         if (err) {
             return res.status(400).json({
                 ok: false,
@@ -57,19 +47,19 @@ async function postCliente(req, res) {
 
         res.json({
             ok: true,
-            cliente: clienteDB
+            reglaAsignacion: reglaAsignacionDB
         });
     });
 }
 
-function putCliente(req, res) {
+function putReglaAsignacion(req, res) {
     let id = req.params.id;
     let body = req.body;
 
-    Cliente.findByIdAndUpdate(
+    ReglaAsignacion.findByIdAndUpdate(
         id,
         body, { new: true, runValidators: true },
-        (err, clienteDB) => {
+        (err, reglaDB) => {
             if (err) {
                 return res.status(400).json({
                     ok: false,
@@ -79,25 +69,25 @@ function putCliente(req, res) {
 
             res.json({
                 ok: true,
-                cliente: clienteDB
+                regla: reglaDB
             });
         }
     );
 }
 
-function deleteCliente(req, res) {
+function deleteReglaAsignacion(req, res) {
     let id = req.params.id;
 
-    //Cliente.findByIdAndRemove(id, (err, clienteDel) => {
+    //ReglaAsignacion.findByIdAndRemove(id, (err, reglaDel) => {
     let cambiaEstado = {
         estado: false
     };
-    let clienteDel;
+    let reglaDel;
 
-    Cliente.findByIdAndUpdate(
+    ReglaAsignacion.findByIdAndUpdate(
         id,
         cambiaEstado, { new: true },
-        (err, clienteDel) => {
+        (err, reglaDel) => {
             if (err) {
                 return res.status(400).json({
                     ok: false,
@@ -108,12 +98,13 @@ function deleteCliente(req, res) {
     );
     res.json({
         ok: true,
-        cliente: clienteDel
+        regla: reglaDel
     });
 }
 module.exports = {
-    getClientes,
-    postCliente,
-    putCliente,
-    deleteCliente
+    getReglasAsignacion,
+    //getReglaAsignacion,
+    postReglaAsignacion,
+    putReglaAsignacion,
+    deleteReglaAsignacion
 };
