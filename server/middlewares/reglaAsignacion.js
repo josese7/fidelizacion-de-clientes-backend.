@@ -101,10 +101,50 @@ function deleteReglaAsignacion(req, res) {
         regla: reglaDel
     });
 }
+
+async function getReglaConsulta(req, res) {
+    let termino = req.params.termino;
+
+    if (termino < 100000) {
+        return res.status(400).json({
+            ok: false,
+            message: 'El monto minimo es 100000'
+        });
+    }
+    let reglas = await ReglaAsignacion.findOne({
+        $and: [{ limiteInf: { $lte: termino } }, { limiteSup: { $gte: termino } }]
+    });
+    console.log('BD :', reglas);
+
+    let regla;
+    if (reglas) {
+        regla = reglas._doc.monto;
+        message = 'OK';
+    } else {
+        regla = 100000;
+        message = 'Se aplico la regla por defaut';
+    }
+    //regla obtenida
+
+    const puntaje = Math.round(termino / regla);
+
+    if (puntaje) {
+        res.json({
+            ok: true,
+            puntaje,
+            message
+        });
+    } else {
+        return res.status(400).json({
+            ok: false
+        });
+    }
+}
 module.exports = {
     getReglasAsignacion,
     //getReglaAsignacion,
     postReglaAsignacion,
     putReglaAsignacion,
-    deleteReglaAsignacion
+    deleteReglaAsignacion,
+    getReglaConsulta
 };
