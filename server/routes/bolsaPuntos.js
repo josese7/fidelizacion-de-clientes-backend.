@@ -17,6 +17,15 @@ app.get('/bolsaPuntos', bolsaPuntosMW.getBolsaPuntos);
 // Buscar Bolsa por IDCliente
 
 app.get('/bolsaPuntosCliente/:termino', bolsaPuntosMW.getBolsaPuntosIdCliente);
+app.get(
+    '/bolsaPuntosvencidas/:cliente',
+    bolsaPuntosMW.getBolsaPuntosClienteVen
+);
+app.get(
+    '/bolsaPuntosvigentes/:cliente',
+    bolsaPuntosMW.getBolsaPuntosClienteVigentes
+);
+
 // Busca bolsas vencidas
 
 app.get('/bolsaPuntosvencidas/', bolsaPuntosMW.getBolsaPuntosVen);

@@ -15,9 +15,9 @@ async function postBolsaPuntos(req, res) {
     }
 
     /*============================================
-                                                                                                 OBTENCION DE LA REGLA PARA CALCULAR LOS PUNTOS
-                                                                                                  ==============================================
-                                                                                                */
+                                                                                                           OBTENCION DE LA REGLA PARA CALCULAR LOS PUNTOS
+                                                                                                            ==============================================
+                                                                                                          */
     let reglas = await ReglasAsignacion.findOne({
         $and: [
             { limiteInf: { $lte: body.montoOperacion } },
@@ -39,9 +39,9 @@ async function postBolsaPuntos(req, res) {
     let puntajeUtilizado = 0;
 
     /*============================================
-                                                                                                                                                                  OBTENCION DE LA REGLA PARA CALCULAR EL VENCIMIENTO
-                                                                                                                                                                  ==============================================
-                                                                                                                                                                  */
+                                                                                                                                                                            OBTENCION DE LA REGLA PARA CALCULAR EL VENCIMIENTO
+                                                                                                                                                                            ==============================================
+                                                                                                                                                                            */
     hoy = new Date().toISOString();
     let vencimiento = await VencimientosPuntos.findOne({
         $and: [{ inicio: { $lte: hoy } }, { fin: { $gte: hoy } }]
@@ -62,8 +62,8 @@ async function postBolsaPuntos(req, res) {
         .format('YYYY' - 'MM' - 'DD');
     console.log(vence);
     /* console.log(dias);
-                                                                                                                                      console.log(puntaje);
-                                                                                                                                      console.log(vencimiento); */
+                                                                                                                                                console.log(puntaje);
+                                                                                                                                                console.log(vencimiento); */
 
     let bolsaPuntos = new BolsaPuntos({
         idCliente: body.idCliente,
@@ -168,6 +168,7 @@ async function getBolsaPuntosVigentes(req, res) {
     let hoy = new Date().toISOString();
 
     await BolsaPuntos.find({ fechaCaducidad: { $gte: hoy } })
+        .sort({ fechaCaducidad: 1 })
         .skip(desde)
         .limit(limite)
         .populate('idCliente')
@@ -258,11 +259,99 @@ function getBolsaPuntosDias(req, res) {
     });
 }
 
+///POR CLIENTE
+
+function getBolsaPuntosClienteVen(req, res) {
+    let desde = req.query.desde || 0;
+    desde = Number(desde);
+
+    let limite = req.query.limite || 5;
+    limite = Number(limite);
+    let hoy = new Date().toISOString();
+
+    let cliente = req.params.cliente;
+
+    BolsaPuntos.find({ fechaCaducidad: { $lt: hoy }, idCliente: cliente })
+        .skip(desde)
+        .limit(limite)
+        .populate('idCliente')
+        .exec((err, bolsaPuntos) => {
+            if (err) {
+                return res.status(400).json({
+                    ok: false,
+                    err
+                });
+            }
+            if (bolsaPuntos == null) {
+                return res.status(204).json({
+                    ok: true,
+                    bolsaPuntos,
+                    message: 'No hay bolsas vencidas'
+                });
+            }
+
+            BolsaPuntos.countDocuments({ fechaCaducidad: { $lt: hoy } },
+                (err, total) => {
+                    res.json({
+                        ok: true,
+                        bolsaPuntos,
+                        total
+                    });
+                }
+            );
+        });
+}
+
+async function getBolsaPuntosClienteVigentes(req, res) {
+    let desde = req.query.desde || 0;
+    desde = Number(desde);
+
+    let limite = req.query.limite || 5;
+    limite = Number(limite);
+    let hoy = new Date().toISOString();
+
+    let cliente = req.params.cliente;
+
+    await BolsaPuntos.find({ fechaCaducidad: { $gte: hoy }, idCliente: cliente })
+        .sort({ fechaCaducidad: 1 })
+        .skip(desde)
+        .limit(limite)
+        .populate('idCliente')
+        .exec((err, bolsaPuntos) => {
+            if (err) {
+                return res.status(400).json({
+                    ok: false,
+                    err
+                });
+            }
+            if (bolsaPuntos == null) {
+                return res.status(204).json({
+                    ok: true,
+                    bolsaPuntos,
+                    message: 'No hay bolsas vigentes'
+                });
+            }
+
+            BolsaPuntos.countDocuments({ fechaCaducidad: { $gte: hoy } },
+                (err, total) => {
+                    res.json({
+                        ok: true,
+                        bolsaPuntos,
+                        total
+                    });
+                }
+            );
+        });
+}
+
 module.exports = {
     postBolsaPuntos,
     getBolsaPuntos,
     getBolsaPuntosVen,
     getBolsaPuntosVigentes,
     getBolsaPuntosIdCliente,
-    getBolsaPuntosDias
+    getBolsaPuntosDias,
+    // por cliente
+    getBolsaPuntosClienteVen,
+    getBolsaPuntosClienteVigentes
 };
