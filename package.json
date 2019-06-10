@@ -17,6 +17,7 @@
         "mongoose": "^5.5.9",
         "mongoose-unique-validator": "^2.0.3",
         "nodemailer": "^6.2.1",
+        "nodemailer-sendgrid-transport": "^0.2.0",
         "underscore": "^1.9.1"
     }
 }

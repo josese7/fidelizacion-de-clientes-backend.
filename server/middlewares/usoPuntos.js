@@ -7,6 +7,7 @@ const Cliente = require('../models/cliente');
 
 const moment = require('moment');
 const nodemailer = require('nodemailer');
+const sendgridTransport = require('nodemailer-sendgrid-transport');
 
 async function postUsoPuntos(req, res) {
   let body = req.body;
@@ -199,7 +200,7 @@ async function postUsoPuntos(req, res) {
                       });
                     }
                     console.log('Aca');
-                    //sendMail('segovia.jose2196@gmail.com').catch(console.error);
+                    sendMail('segovia.jose2196@gmail.com').catch(console.error);
                     console.log('Email enviado');
                   });
                 });
@@ -391,27 +392,27 @@ async function sendMail(mailCliente) {
   // Only needed if you don't have a real mail account for testing
 
   // create reusable transporter object using the default SMTP transport
-  var transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: 'segovia.jose21096@gmail.com',
-      pass: '021096josemma!!'
+  const transporter = nodemailer.createTransport(
+    sendgridTransport({
+      auth: {
+        api_key:
+          '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'
+      }
+    })
+  );
+
+  transporter.sendMail(
+    {
+      to: mailCliente,
+      from: 'segovia.jose2196@gmail.com',
+      subject: 'Uso de puntos',
+      html: '<h1>Se han canjeado correctamente los puntos</h1>'
+    },
+    function(err, info) {
+      if (err) console.log(err);
+      else console.log(info);
     }
-  });
-
-  // send mail with defined transport object
-  const mailOptions = {
-    from: 'segovia.jose21096@gmail.com', // sender address
-    to: `<${mailCliente}>`, // list of receivers
-    subject: 'Uso de puntos', // Subject line
-    html: `<Se han canjeado correctamente los puntos` // plain text body
-  };
-  console.log(mailCliente);
-
-  transporter.sendMail(mailOptions, function(err, info) {
-    if (err) console.log(err);
-    else console.log(info);
-  });
+  );
 }
 
 module.exports = {
