@@ -30,9 +30,15 @@ app.get(
 
 app.get('/bolsaPuntosvencidas/', bolsaPuntosMW.getBolsaPuntosVen);
 
+//Bolsas vigentes
+
 app.get('/bolsaPuntosvigentes/', bolsaPuntosMW.getBolsaPuntosVigentes);
 
+//Bolsas que vencen en x dias
+
 app.get('/bolsaPuntosDias/:termino', bolsaPuntosMW.getBolsaPuntosDias);
+
+//post
 
 app.post('/bolsaPuntos', bolsaPuntosMW.postBolsaPuntos);
 
